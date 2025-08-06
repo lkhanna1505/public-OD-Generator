@@ -5,7 +5,7 @@ from docx.shared import RGBColor
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 import os
-from datetime import datetime
+from datetime import datetime, date, time
 from io import BytesIO
 
 
@@ -111,7 +111,7 @@ def create_word_document(data):
             tr[1].text = str(row['Name'])
             tr[2].text = str(row['Registration Number'])
             tr[3].text = str(row['Section'])
-            tr[4].text = str(row['Date'])
+            tr[4].text = str(row['Date'])  # This now comes from user input
             tr[5].text = str(row['From']) if pd.notna(row['From']) else ''
             tr[6].text = str(row['To']) if pd.notna(row['To']) else ''
 
@@ -144,8 +144,8 @@ def create_word_document(data):
     return doc_buffer.getvalue()
 
 
-def process_uploaded_data(uploaded_file):
-    """Process uploaded CSV/Excel file"""
+def process_uploaded_data(uploaded_file, event_date, from_time, to_time):
+    """Process uploaded CSV/Excel file and add user-provided date and times"""
     try:
         # Read uploaded file
         if uploaded_file.name.endswith('.csv'):
@@ -155,11 +155,17 @@ def process_uploaded_data(uploaded_file):
         else:
             raise ValueError("Unsupported file format")
             
-        required_cols = ['Name', 'Registration Number', 'Section', 'Branch', 'Semester', 'Date', 'From', 'To']
+        # Updated required columns (removed Date, From, To since user provides them)
+        required_cols = ['Name', 'Registration Number', 'Section', 'Branch', 'Semester']
         missing_cols = [col for col in required_cols if col not in data.columns]
         
         if missing_cols:
             raise ValueError(f"Missing columns: {', '.join(missing_cols)}")
+        
+        # Add user-provided date and times to all rows
+        data['Date'] = event_date.strftime("%d-%m-%Y")
+        data['From'] = from_time.strftime("%H:%M")
+        data['To'] = to_time.strftime("%H:%M")
             
         return data
         
@@ -190,26 +196,22 @@ def main():
         - Section
         - Branch
         - Semester
-        - Date
-        - From
-        - To
+        
+        **Note:** Date, From, and To times will be entered on the main page and applied to all participants.
         
         **Supported formats:**
         - CSV (.csv)
         - Excel (.xlsx, .xls)
         """)
         
-        # Sample data download
+        # Sample data download (updated)
         st.header("📥 Sample Data")
         sample_data = {
             'Name': ['John Doe', 'Jane Smith', 'Mike Johnson'],
             'Registration Number': ['REG001', 'REG002', 'REG003'],
             'Section': ['A', 'B', 'A'],
             'Branch': ['CSE', 'ECE', 'CSE'],
-            'Semester': [1, 2, 1],
-            'Date': ['2024-01-15', '2024-01-15', '2024-01-15'],
-            'From': ['09:00', '10:00', '09:00'],
-            'To': ['17:00', '16:00', '17:00']
+            'Semester': [1, 2, 1]
         }
         sample_df = pd.DataFrame(sample_data)
         csv_sample = sample_df.to_csv(index=False)
@@ -234,13 +236,47 @@ def main():
             help="Upload CSV or Excel file with participant data"
         )
         
+        # Event details section
+        st.header("📅 Event Details")
+        
+        col_date, col_from, col_to = st.columns([1, 1, 1])
+        
+        with col_date:
+            event_date = st.date_input(
+                "Event Date",
+                value=date.today(),
+                help="Select the date for the OD"
+            )
+        
+        with col_from:
+            from_time = st.time_input(
+                "From Time",
+                value=time(9, 0),  # Default 9:00 AM
+                help="Start time for the OD"
+            )
+        
+        with col_to:
+            to_time = st.time_input(
+                "To Time", 
+                value=time(17, 0),  # Default 5:00 PM
+                help="End time for the OD"
+            )
+        
+        # Show selected details
+        st.info(f"📋 **Event Details:** {event_date.strftime('%d-%m-%Y')} from {from_time.strftime('%H:%M')} to {to_time.strftime('%H:%M')}")
+        
         if uploaded_file is not None:
             # Show file details
             st.success(f"✅ File uploaded: {uploaded_file.name}")
             
+            # Validate time input
+            if from_time >= to_time:
+                st.error("❌ 'From Time' must be earlier than 'To Time'")
+                return
+            
             # Process the uploaded file
             with st.spinner("Processing file..."):
-                df = process_uploaded_data(uploaded_file)
+                df = process_uploaded_data(uploaded_file, event_date, from_time, to_time)
             
             if not df.empty:
                 st.success(f"🎉 Data loaded successfully! **{len(df)} records** found.")
@@ -255,6 +291,12 @@ def main():
                     st.metric("Total Records", len(df))
                     st.metric("Unique Branches", df['Branch'].nunique())
                     st.metric("Unique Semesters", df['Semester'].nunique())
+                    
+                    # Show event details in stats
+                    st.subheader("Event Details")
+                    st.write(f"**Date:** {event_date.strftime('%d-%m-%Y')}")
+                    st.write(f"**From:** {from_time.strftime('%H:%M')}")
+                    st.write(f"**To:** {to_time.strftime('%H:%M')}")
                     
                     # Show branch-wise count
                     st.subheader("Branch Distribution")
@@ -280,7 +322,7 @@ def main():
                             try:
                                 # Generate timestamp for filename
                                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                                output_filename = f'OD_List_All_Branches_{timestamp}.docx'
+                                output_filename = f'OD_List_{event_date.strftime("%Y%m%d")}_{timestamp}.docx'
                                 
                                 # Create document
                                 doc_bytes = create_word_document(df)
@@ -303,27 +345,26 @@ def main():
             
             else:
                 st.error("❌ Failed to process the uploaded file. Please check the format and required columns.")
-        # End of if uploaded_file is not None
-
+        
     # Show upload instructions when no file is uploaded
-    st.info("👆 Please upload a CSV or Excel file to get started")
-    
-    # Show format example
-    st.subheader("📋 Expected File Format")
-    st.markdown("Your file should contain the following columns:")
-    
-    example_data = {
-        'Name': ['Student Name'],
-        'Registration Number': ['REG001'],
-        'Section': ['A'],
-        'Branch': ['CSE'],
-        'Semester': [1],
-        'Date': ['2024-01-15'],
-        'From': ['09:00'],
-        'To': ['17:00']
-    }
-    example_df = pd.DataFrame(example_data)
-    st.dataframe(example_df, use_container_width=True)
+    if uploaded_file is None:
+        st.info("👆 Please upload a CSV or Excel file and set the event details to get started")
+        
+        # Show format example
+        st.subheader("📋 Expected File Format")
+        st.markdown("Your file should contain the following columns:")
+        
+        example_data = {
+            'Name': ['Student Name'],
+            'Registration Number': ['REG001'],
+            'Section': ['A'],
+            'Branch': ['CSE'],
+            'Semester': [1]
+        }
+        example_df = pd.DataFrame(example_data)
+        st.dataframe(example_df, use_container_width=True)
+        
+        st.markdown("**Note:** Date, From, and To times will be entered above and applied to all participants.")
 
 
 if __name__ == "__main__":
