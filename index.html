@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OD List Generator - Transform Your Data in Seconds!</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Reset and Base Styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        /* Dark theme as default */
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); */
+        --secondary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --glass-bg: rgba(30, 41, 59, 0.4);
+        --glass-border: rgba(148, 163, 184, 0.2);
+        --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        --backdrop-blur: blur(8px);
+      }
+
+      [data-theme="light"] {
+        --bg-primary: #f8fafc;
+        --bg-secondary: #ffffff;
+        --text-primary: #1a202c;
+        --text-secondary: #718096;
+        --glass-bg: rgba(255, 255, 255, 0.25);
+        --glass-border: rgba(255, 255, 255, 0.18);
+        --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      }
+
+      html {
+        scroll-behavior: auto; /* Disable smooth scrolling for instant page switching */
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        overflow-x: hidden;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Glassmorphism utility class */
+      .glass {
+        background: var(--glass-bg);
+        backdrop-filter: var(--backdrop-blur);
+        -webkit-backdrop-filter: var(--backdrop-blur);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--shadow);
+      }
+
+      /* Background animations */
+      .bg-animation {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        opacity: 0.6;
+      }
+
+      .floating-shape {
+        position: absolute;
+        background: var(--primary-gradient);
+        border-radius: 50%;
+        filter: blur(40px);
+        animation: float 6s ease-in-out infinite;
+      }
+
+      .shape-1 {
+        width: 300px;
+        height: 300px;
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+      }
+
+      .shape-2 {
+        width: 200px;
+        height: 200px;
+        top: 50%;
+        right: 10%;
+        background: var(--secondary-gradient);
+        animation-delay: 2s;
+      }
+
+      .shape-3 {
+        width: 250px;
+        height: 250px;
+        bottom: 10%;
+        left: 30%;
+        background: var(--accent-gradient);
+        animation-delay: 4s;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        33% {
+          transform: translateY(-20px) rotate(120deg);
+        }
+        66% {
+          transform: translateY(20px) rotate(240deg);
+        }
+      }
+
+      /* Dark Mode Toggle */
+      .theme-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        z-index: 1000;
+        font-size: 1.5rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        color: var(--text-primary);
+      }
+
+      .theme-toggle:hover {
+        transform: scale(1.1);
+      }
+
+      /* Navigation - More rounded corners */
+      .navbar {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 999;
+        border-radius: 40px; /* Increased from 20px for more rounded corners */
+        padding: 12px 24px; /* Slightly increased padding for better proportion */
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .nav-container {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+      }
+
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 1.2rem;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .nav-menu {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        border-radius: 20px;
+        padding: 5px;
+      }
+
+      .nav-link {
+        text-decoration: none;
+        color: var(--text-primary);
+        font-weight: 500;
+        padding: 8px 16px;
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+      }
+
+      .nav-link:hover {
+        background: rgba(102, 126, 234, 0.1);
+        backdrop-filter: blur(10px);
+      }
+
+      .nav-link.active {
+        background: var(--primary-gradient);
+        color: white;
+      }
+
+      .cta-button {
+        background: var(--primary-gradient);
+        color: white !important;
+        padding: 12px 24px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+      }
+
+      /* Mobile Navigation */
+      .hamburger {
+        display: none;
+        flex-direction: column;
+        cursor: pointer;
+        gap: 4px;
+      }
+
+      .hamburger span {
+        width: 25px;
+        height: 3px;
+        background: var(--text-primary);
+        border-radius: 2px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .hamburger.active span:nth-child(1) {
+        transform: rotate(45deg) translate(6px, 6px);
+      }
+
+      .hamburger.active span:nth-child(2) {
+        opacity: 0;
+      }
+
+      .hamburger.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -6px);
+      }
+
+      /* Page Container - Updated for scroll-based navigation */
+      .page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 100px 20px 50px;
+      }
+
+      .container {
+        max-width: 1200px;
+        width: 100%;
+        margin: 0 auto;
+      }
+
+      /* Hero Section */
+      .hero {
+        text-align: center;
+        padding: 80px 0;
+      }
+
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 2rem;
+        background: var(--primary-gradient);
+        color: white;
+        animation: slideInDown 1s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .hero-title {
+        font-size: clamp(3rem, 8vw, 6rem);
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: slideInUp 1s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+      }
+
+      .hero-subtitle {
+        font-size: clamp(1.2rem, 3vw, 1.5rem);
+        color: var(--text-secondary);
+        margin-bottom: 3rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        animation: slideInUp 1s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
+      }
+
+      .hero-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 4rem;
+        animation: slideInUp 1s cubic-bezier(0.4, 0, 0.2, 1) 0.6s both;
+      }
+
+      .btn {
+        padding: 16px 32px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 2px solid transparent;
+        min-width: 180px;
+        justify-content: center;
+      }
+
+      .btn-primary {
+        background: var(--primary-gradient);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-secondary {
+        color: var(--text-primary);
+        border: 2px solid var(--glass-border);
+        backdrop-filter: var(--backdrop-blur);
+        background: var(--glass-bg);
+      }
+
+      .btn-secondary:hover {
+        background: var(--primary-gradient);
+        color: white;
+        border-color: transparent;
+      }
+
+      .hero-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        animation: slideInUp 1s cubic-bezier(0.4, 0, 0.2, 1) 0.8s both;
+      }
+
+      .stat-card {
+        text-align: center;
+        padding: 2rem;
+        border-radius: 20px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .stat-card:hover {
+        transform: translateY(-10px);
+      }
+
+      .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+      }
+
+      .stat-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      /* Features Section */
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        padding: 2rem 0;
+      }
+
+      .feature-card {
+        padding: 3rem 2rem;
+        border-radius: 24px;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .feature-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--primary-gradient);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+      }
+
+      .feature-card:hover::before {
+        opacity: 0.1;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-15px);
+      }
+
+      .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--primary-gradient);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: white;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .feature-card:hover .feature-icon {
+        transform: scale(1.1) rotate(5deg);
+      }
+
+      .feature-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+      }
+
+      .feature-description {
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+
+      /* Section Headers */
+      .section-header {
+        text-align: center;
+        margin-bottom: 4rem;
+      }
+
+      .section-title {
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 800;
+        margin-bottom: 1rem;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .section-subtitle {
+        font-size: 1.3rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      /* Demo Steps */
+      .demo-steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 2rem 0;
+      }
+
+      .step-card {
+        padding: 2rem;
+        border-radius: 20px;
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .step-card:hover {
+        transform: translateY(-10px);
+      }
+
+      .step-number {
+        width: 60px;
+        height: 60px;
+        background: var(--primary-gradient);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 auto 1.5rem;
+      }
+
+      .step-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+      }
+
+      .step-description {
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+
+      /* Special Section */
+      .special-section {
+        padding: 4rem 2rem;
+        border-radius: 30px;
+        margin: 4rem 0;
+        text-align: center;
+        background: var(--secondary-gradient);
+        color: white;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .special-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grain)"/></svg>');
+        opacity: 0.5;
+      }
+
+      .special-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .special-title {
+        font-size: clamp(2rem, 5vw, 3rem);
+        font-weight: 800;
+        margin-bottom: 1rem;
+      }
+
+      .special-description {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+      }
+
+      /* Footer */
+      .footer {
+        padding: 3rem 2rem 1rem;
+        text-align: center;
+        border-radius: 30px 30px 0 0;
+        margin-top: 4rem;
+      }
+
+      .footer-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .footer-section h4 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .footer-links {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .footer-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: all 0.3s ease;
+      }
+
+      .footer-links a:hover {
+        color: var(--text-primary);
+        transform: translateX(5px);
+      }
+
+      .social-links {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      .social-link {
+        width: 50px;
+        height: 50px;
+        background: var(--primary-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .social-link:hover {
+        transform: translateY(-5px) scale(1.1);
+      }
+
+      .footer-bottom {
+        padding-top: 2rem;
+        border-top: 1px solid var(--glass-border);
+        color: var(--text-secondary);
+      }
+
+      .lakshya-credit {
+        background: var(--secondary-gradient);
+        color: white;
+        padding: 1rem;
+        margin: 2rem -2rem -1rem;
+        border-radius: 0 0 30px 30px;
+        font-weight: 600;
+      }
+
+      /* Animations */
+      @keyframes slideInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .navbar {
+          top: 10px;
+          left: 10px;
+          right: 10px;
+          transform: none;
+          border-radius: 25px; /* Adjusted for mobile but still rounded */
+          padding: 15px 20px;
+        }
+
+        .nav-container {
+          justify-content: space-between;
+        }
+
+        .nav-menu {
+          position: fixed;
+          top: 80px;
+          left: 10px;
+          right: 10px;
+          flex-direction: column;
+          padding: 2rem;
+          border-radius: 25px; /* More rounded on mobile too */
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(-20px);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-menu.active {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+        }
+
+        .hamburger {
+          display: flex;
+        }
+
+        .theme-toggle {
+          top: 15px;
+          right: 80px;
+          width: 50px;
+          height: 50px;
+        }
+
+        .hero-buttons {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .btn {
+          width: 100%;
+          max-width: 300px;
+        }
+
+        .features-grid,
+        .demo-steps {
+          grid-template-columns: 1fr;
+        }
+
+        .special-section {
+          margin: 2rem 0;
+          padding: 3rem 1.5rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .page {
+          padding: 80px 15px 30px;
+        }
+
+        .hero {
+          padding: 40px 0;
+        }
+
+        .feature-card,
+        .step-card {
+          padding: 2rem 1.5rem;
+        }
+
+        .stat-card {
+          padding: 1.5rem;
+        }
+
+        .footer {
+          padding: 2rem 1rem 1rem;
+        }
+
+        .footer-content {
+          grid-template-columns: 1fr;
+          text-align: center;
+        }
+
+        .navbar {
+          border-radius: 20px; /* Slightly less rounded on very small screens */
+        }
+      }
+    </style>
+  </head>
+  <body data-theme="dark">
+    <!-- Background Animation -->
+    <div class="bg-animation">
+      <div class="floating-shape shape-1"></div>
+      <div class="floating-shape shape-2"></div>
+      <div class="floating-shape shape-3"></div>
+    </div>
+
+    <!-- Dark Mode Toggle -->
+    <button class="theme-toggle glass" id="themeToggle">
+      <i class="fas fa-sun" id="themeIcon"></i>
+    </button>
+
+    <!-- Navigation -->
+    <nav class="navbar glass">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <i class="fas fa-clipboard-list"></i>
+          <span>OD Generator</span>
+        </div>
+        <div class="nav-menu glass" id="navMenu">
+          <a href="#home" class="nav-link active" data-page="home">Home</a>
+          <a href="#features" class="nav-link" data-page="features">Features</a>
+          <a href="#demo" class="nav-link" data-page="demo">Demo</a>
+          <a href="#about" class="nav-link" data-page="about">About</a>
+          <a
+            href="http://srmodgen.streamlit.app"
+            class="cta-button"
+            target="_blank"
+          >
+            <i class="fas fa-rocket"></i>
+            Try Now
+          </a>
+        </div>
+        <div class="hamburger" id="hamburger">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Home Page -->
+    <div class="page" id="home">
+      <div class="container">
+        <div class="hero">
+          <div class="hero-badge">
+            <i class="fas fa-star"></i>
+            <span>Transform Your Data in Seconds!</span>
+          </div>
+          <h1 class="hero-title">OD List Generator</h1>
+          <p class="hero-subtitle">
+            The ultimate solution for generating Official Duty lists with style
+            and efficiency! Built specifically for the exasperated organizers of
+            SRM IST Delhi-NCR campus.
+          </p>
+          <div class="hero-buttons">
+            <a
+              href="http://srmodgen.streamlit.app"
+              class="btn btn-primary"
+              target="_blank"
+            >
+              <i class="fas fa-rocket"></i>
+              Launch App
+            </a>
+            <a
+              href="#features"
+              class="btn btn-secondary"
+              onclick="scrollToPage('features')"
+            >
+              <i class="fas fa-play"></i>
+              Explore Features
+            </a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-card glass">
+              <div class="stat-number">5</div>
+              <div class="stat-label">Documents Generated</div>
+            </div>
+            <div class="stat-card glass">
+              <div class="stat-number">1</div>
+              <div class="stat-label">Happy Organizer</div>
+            </div>
+            <div class="stat-card glass">
+              <div class="stat-number">96%</div>
+              <div class="stat-label">Format Accuracy</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features Page -->
+    <div class="page" id="features">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Powerful Features</h2>
+          <p class="section-subtitle">
+            Everything you need to transform your OD process
+          </p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card glass">
+            <div class="feature-icon">
+              <i class="fas fa-bolt"></i>
+            </div>
+            <h3 class="feature-title">ONE-CLICK TRANSFORMATION</h3>
+            <p class="feature-description">
+              Upload your CSV/Excel → Get professional Word documents instantly
+            </p>
+          </div>
+          <div class="feature-card glass">
+            <div class="feature-icon">
+              <i class="fas fa-sort-amount-down"></i>
+            </div>
+            <h3 class="feature-title">SMART SORTING</h3>
+            <p class="feature-description">
+              Automatically organizes by semester and branch with intelligent
+              processing
+            </p>
+          </div>
+          <div class="feature-card glass">
+            <div class="feature-icon">
+              <i class="fas fa-clock"></i>
+            </div>
+            <h3 class="feature-title">UNIFIED TIMING</h3>
+            <p class="feature-description">
+              Set one date/time for all participants - no more manual entry
+            </p>
+          </div>
+          <div class="feature-card glass">
+            <div class="feature-icon">
+              <i class="fas fa-palette"></i>
+            </div>
+            <h3 class="feature-title">PROFESSIONAL FORMATTING</h3>
+            <p class="feature-description">
+              Clean tables with perfect borders and styling that impresses
+            </p>
+          </div>
+          <div class="feature-card glass">
+            <div class="feature-icon">
+              <i class="fas fa-globe"></i>
+            </div>
+            <h3 class="feature-title">WEB-BASED</h3>
+            <p class="feature-description">
+              No installation needed - runs directly in your browser
+            </p>
+          </div>
+          <div class="feature-card glass">
+            <div class="feature-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3 class="feature-title">DATA VALIDATION</h3>
+            <p class="feature-description">
+              Built-in validation with helpful error messages and data cleaning
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demo Page -->
+    <div class="page" id="demo">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">How It Works</h2>
+          <p class="section-subtitle">
+            Three simple steps to perfect OD documents
+          </p>
+        </div>
+        <div class="demo-steps">
+          <div class="step-card glass">
+            <div class="step-number">1</div>
+            <h3 class="step-title">Upload Your Data</h3>
+            <p class="step-description">
+              Simply drag and drop your CSV/Excel file with participant
+              information. No complex formatting required.
+            </p>
+          </div>
+          <div class="step-card glass">
+            <div class="step-number">2</div>
+            <h3 class="step-title">Set Event Details</h3>
+            <p class="step-description">
+              Choose your event date and timing. These details will be applied
+              to all participants automatically.
+            </p>
+          </div>
+          <div class="step-card glass">
+            <div class="step-number">3</div>
+            <h3 class="step-title">Download Perfect Document</h3>
+            <p class="step-description">
+              Get your professionally formatted Word document instantly. Ready
+              for HOD approval!
+            </p>
+          </div>
+        </div>
+
+        <div class="special-section">
+          <div class="special-content">
+            <h3 class="special-title">Built for SRM IST Delhi-NCR</h3>
+            <p class="special-description">
+              For the exasperated organizers of all clubs and societies. No more
+              formatting nightmares, no more late-night corrections. Just
+              perfect ODs, every time.
+            </p>
+            <a
+              href="http://srmodgen.streamlit.app"
+              class="btn btn-secondary"
+              target="_blank"
+            >
+              <i class="fas fa-rocket"></i>
+              Try It Now
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- About Page -->
+    <div class="page" id="about">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">About This Project</h2>
+          <p class="section-subtitle">Built with love for the SRM community</p>
+        </div>
+
+        <div
+          class="feature-card glass"
+          style="max-width: 800px; margin: 0 auto; text-align: center"
+        >
+          <div
+            class="feature-icon"
+            style="background: var(--secondary-gradient)"
+          >
+            <i class="fas fa-heart"></i>
+          </div>
+          <h3 class="feature-title">Why This Exists?</h3>
+          <p
+            class="feature-description"
+            style="font-size: 1.1rem; line-height: 1.8"
+          >
+            Every club organizer at SRM knows the struggle. HODs want perfect
+            formatting, participants need quick approvals, and you're stuck in
+            the middle fixing tables at 2 AM. This tool was born from that exact
+            frustration - to give you back your time and sanity.
+          </p>
+        </div>
+
+        <div class="footer glass">
+          <div class="footer-content">
+            <div class="footer-section">
+              <h4>Quick Links</h4>
+              <ul class="footer-links">
+                <li><a href="#home" onclick="scrollToPage('home')">Home</a></li>
+                <li>
+                  <a href="#features" onclick="scrollToPage('features')"
+                    >Features</a
+                  >
+                </li>
+                <li><a href="#demo" onclick="scrollToPage('demo')">Demo</a></li>
+                <li>
+                  <a href="http://srmodgen.streamlit.app" target="_blank"
+                    >Try App</a
+                  >
+                </li>
+              </ul>
+            </div>
+            <div class="footer-section">
+              <h4>Resources</h4>
+              <ul class="footer-links">
+                <li>
+                  <a href="#demo" onclick="scrollToPage('demo')"
+                    >Documentation</a
+                  >
+                </li>
+                <li>
+                  <a href="testing_for_od.participant_data.csv" download
+                    >Sample Data</a
+                  >
+                </li>
+                <li>
+                  <a href="#" onclick="showTroubleshooting(event)"
+                    >Troubleshooting</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/lkhanna1505/public-OD-Generator/blob/main/readme.md"
+                    target="_blank"
+                    >FAQ</a
+                  >
+                </li>
+              </ul>
+            </div>
+            <div class="footer-section">
+              <h4>Connect</h4>
+              <div class="social-links">
+                <a
+                  href="https://www.github.com/lkhanna1505"
+                  class="social-link"
+                  target="_blank"
+                  ><i class="fab fa-github"></i
+                ></a>
+                <a
+                  href="https://www.linkedin.com/in/lkhanna1505"
+                  class="social-link"
+                  target="_blank"
+                  ><i class="fab fa-linkedin"></i
+                ></a>
+                <a
+                  href="https://www.x.com/lkhanna1505"
+                  class="social-link"
+                  target="_blank"
+                  ><i class="fab fa-twitter"></i
+                ></a>
+              </div>
+            </div>
+          </div>
+          <div class="footer-bottom">
+            <p>
+              &copy; 2024 OD List Generator. Made with ❤️ for SRM IST Delhi-NCR
+              campus' exasperate event organizers.
+            </p>
+          </div>
+          <!-- <div class="lakshya-credit">
+            <p>
+              ✨ Crafted by Lakshya for the exasperated organizers of SRM IST
+              Delhi-NCR ✨
+            </p>
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Troubleshooting Modal -->
+    <div
+      id="troubleshootingModal"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(15, 23, 42, 0.7);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: var(--bg-secondary);
+          color: var(--text-primary);
+          padding: 2rem;
+          border-radius: 20px;
+          max-width: 800px;
+          width: 90%;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+          position: relative;
+        "
+      >
+        <h2 style="margin-bottom: 1rem">Troubleshooting</h2>
+        <div style="margin-bottom: 1.5rem">
+          <h3 style="margin-bottom: 0.5rem">🐛 Troubleshooting Guide</h3>
+          <table
+            style="
+              width: 100%;
+              margin-bottom: 1rem;
+              border-collapse: collapse;
+              color: var(--text-secondary);
+              font-size: 1rem;
+            "
+          >
+            <thead>
+              <tr style="background: var(--glass-bg)">
+                <th style="padding: 0.5rem; text-align: left">🚨 Problem</th>
+                <th style="padding: 0.5rem; text-align: left">💡 Solution</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 0.5rem">📁 File upload fails</td>
+                <td style="padding: 0.5rem">
+                  Check file format (CSV/Excel only)
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem">🕐 Time validation error</td>
+                <td style="padding: 0.5rem">
+                  Ensure "From" time is earlier than "To" time
+                </td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem">🔢 Missing columns</td>
+                <td style="padding: 0.5rem">Follow required format exactly</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem">📄 Document generation fails</td>
+                <td style="padding: 0.5rem">
+                  Check for empty values or wrong data types
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="margin-bottom: 1rem">
+            <strong>🔧 Debug Mode:</strong>
+            <div style="font-size: 0.95rem; margin-top: 0.3rem">
+              <span
+                style="
+                  background: var(--glass-bg);
+                  padding: 0.2rem 0.5rem;
+                  border-radius: 6px;
+                  font-family: monospace;
+                "
+              >
+                streamlit run app.py --logger.level debug
+              </span>
+              <br />
+              <span style="color: var(--text-secondary); font-size: 0.95em">
+                Run this command for detailed error logs and troubleshooting
+                info.
+              </span>
+            </div>
+          </div>
+          <div style="color: var(--text-secondary); font-size: 0.95em">
+            If problems persist, try refreshing the page or contact support for
+            help.
+          </div>
+        </div>
+        <button
+          onclick="closeTroubleshooting()"
+          style="
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.5rem 1.5rem;
+            cursor: pointer;
+          "
+        >
+          Close
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // Theme toggle functionality (default to dark)
+      const themeToggle = document.getElementById("themeToggle");
+      const themeIcon = document.getElementById("themeIcon");
+      const body = document.body;
+
+      // Set dark theme as default
+      const currentTheme = localStorage.getItem("theme") || "dark";
+      body.setAttribute("data-theme", currentTheme);
+      themeIcon.className =
+        currentTheme === "dark" ? "fas fa-sun" : "fas fa-moon";
+
+      themeToggle.addEventListener("click", () => {
+        const currentTheme = body.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+        body.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+        themeIcon.className =
+          newTheme === "dark" ? "fas fa-sun" : "fas fa-moon";
+      });
+
+      // Mobile navigation
+      const hamburger = document.getElementById("hamburger");
+      const navMenu = document.getElementById("navMenu");
+
+      hamburger.addEventListener("click", () => {
+        hamburger.classList.toggle("active");
+        navMenu.classList.toggle("active");
+      });
+
+      // Scroll-based page navigation (instant, no animations)
+      const navLinks = document.querySelectorAll(".nav-link");
+      let isScrolling = false;
+
+      function scrollToPage(pageId) {
+        const targetPage = document.getElementById(pageId);
+        if (targetPage) {
+          isScrolling = true;
+          targetPage.scrollIntoView({
+            behavior: "auto", // Instant scroll, no smooth animation
+            block: "start",
+          });
+          updateActiveNav(pageId);
+
+          // Close mobile menu
+          hamburger.classList.remove("active");
+          navMenu.classList.remove("active");
+
+          setTimeout(() => {
+            isScrolling = false;
+          }, 100);
+        }
+      }
+
+      function updateActiveNav(activePageId) {
+        navLinks.forEach((link) => {
+          link.classList.remove("active");
+          if (link.getAttribute("data-page") === activePageId) {
+            link.classList.add("active");
+          }
+        });
+      }
+
+      // Handle navigation clicks
+      navLinks.forEach((link) => {
+        if (link.hasAttribute("data-page")) {
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            const targetPage = link.getAttribute("data-page");
+            scrollToPage(targetPage);
+          });
+        }
+      });
+
+      // Detect which page is in view and update navbar accordingly
+      const pages = document.querySelectorAll(".page");
+      let currentPage = "home";
+
+      function detectCurrentPage() {
+        if (isScrolling) return; // Don't update during programmatic scrolling
+
+        let foundPage = null;
+        const scrollPosition = window.scrollY + window.innerHeight / 2;
+
+        pages.forEach((page) => {
+          const pageTop = page.offsetTop;
+          const pageBottom = pageTop + page.offsetHeight;
+
+          if (scrollPosition >= pageTop && scrollPosition <= pageBottom) {
+            foundPage = page.id;
+          }
+        });
+
+        if (foundPage && foundPage !== currentPage) {
+          currentPage = foundPage;
+          updateActiveNav(currentPage);
+        }
+      }
+
+      // Throttled scroll listener for better performance
+      let ticking = false;
+      window.addEventListener("scroll", () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            detectCurrentPage();
+            ticking = false;
+          });
+          ticking = true;
+        }
+      });
+
+      // Handle browser back/forward buttons
+      window.addEventListener("popstate", (e) => {
+        const currentPage = location.hash.substring(1) || "home";
+        scrollToPage(currentPage);
+      });
+
+      // Set initial page based on URL hash
+      document.addEventListener("DOMContentLoaded", () => {
+        const initialPage = location.hash.substring(1) || "home";
+        if (initialPage !== "home") {
+          setTimeout(() => scrollToPage(initialPage), 100);
+        }
+      });
+
+      // Intersection Observer for animations (keeping the card animations)
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: "0px 0px -50px 0px",
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = "1";
+            entry.target.style.transform = "translateY(0)";
+          }
+        });
+      }, observerOptions);
+
+      // Observe cards for stagger animations
+      document
+        .querySelectorAll(".feature-card, .step-card, .stat-card")
+        .forEach((el, index) => {
+          el.style.opacity = "0";
+          el.style.transform = "translateY(30px)";
+          el.style.transition = `opacity 0.6s ease ${
+            index * 0.1
+          }s, transform 0.6s ease ${index * 0.1}s`;
+          observer.observe(el);
+        });
+
+      // Parallax effect for floating shapes (keeping this subtle animation)
+      window.addEventListener("scroll", () => {
+        const scrolled = window.pageYOffset;
+        const shapes = document.querySelectorAll(".floating-shape");
+
+        shapes.forEach((shape, index) => {
+          const speed = (index + 1) * 0.5;
+          shape.style.transform = `translateY(${scrolled * speed}px)`;
+        });
+      });
+
+      // Keep interactive effects for cards
+      document.querySelectorAll(".feature-card, .step-card").forEach((card) => {
+        card.addEventListener("mouseenter", () => {
+          card.style.transform = "translateY(-15px) scale(1.02)";
+        });
+
+        card.addEventListener("mouseleave", () => {
+          card.style.transform = "translateY(0) scale(1)";
+        });
+      });
+
+      // Keyboard navigation
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          hamburger.classList.remove("active");
+          navMenu.classList.remove("active");
+        }
+
+        // Arrow key navigation
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          const pages = ["home", "features", "demo", "about"];
+          const currentIndex = pages.indexOf(currentPage);
+          let nextIndex;
+
+          if (e.key === "ArrowDown") {
+            nextIndex = (currentIndex + 1) % pages.length;
+          } else {
+            nextIndex = (currentIndex - 1 + pages.length) % pages.length;
+          }
+
+          scrollToPage(pages[nextIndex]);
+          e.preventDefault();
+        }
+      });
+
+      // Add loading effect for external links
+      document.querySelectorAll('a[target="_blank"]').forEach((link) => {
+        link.addEventListener("click", () => {
+          link.style.transform = "scale(0.95)";
+          setTimeout(() => {
+            link.style.transform = "scale(1)";
+          }, 150);
+        });
+      });
+
+      // Troubleshooting modal functions
+      function showTroubleshooting(event) {
+        event.preventDefault();
+        const modal = document.getElementById("troubleshootingModal");
+        modal.style.display = "flex";
+        modal.style.opacity = "0";
+        setTimeout(() => {
+          modal.style.opacity = "1";
+        }, 10);
+      }
+
+      function closeTroubleshooting() {
+        const modal = document.getElementById("troubleshootingModal");
+        modal.style.opacity = "0";
+        setTimeout(() => {
+          modal.style.display = "none";
+        }, 300);
+      }
+    </script>
+  </body>
+</html>
