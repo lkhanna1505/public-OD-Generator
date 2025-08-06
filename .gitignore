@@ -1,0 +1,11 @@
+#files
+run.py
+old.py
+*.xlsx
+*.xls
+*.docx
+*.doc
+*.csv
+*.json
+
+#folder
